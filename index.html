@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body, section,
+        section .section-item .bg {
+            width: 100%;
+        }
+
+        .flex {
+            display: flex;
+            display: inline-flex;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        .absolute {
+            position: absolute;
+        }
+
+        .fiexd {
+            position: fixed;
+        }
+
+        .main {
+            width: 57.4%;
+            left: 50%;
+            top: 50%;
+            margin-left: -28.7%;
+            margin-top: -208px;
+            flex-wrap: wrap;
+        }
+
+        #zp .main {
+            margin-top: -170px;
+            width: 52%;
+            margin-left: -26%;
+        }
+
+        #zp .main .zp-left,
+        #zp .main .zp-right {
+            flex: 1;
+            position: relative;
+        }
+
+        #zp .main .zp-left .zp-bg {
+            width: 100%;
+        }
+
+        #zp .main .zp-left .zp-point {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            left: 50%;
+            margin-left: -75px;
+            top: 50%;
+            margin-top: -105px;
+            cursor: pointer;
+        }
+
+        #zp .main .zp-left h5 {
+            text-align: center;
+            color: #f9e285;
+            height: 30px;
+            line-height: 30px;
+            font-size: 20px;
+            margin: 10px 0 15px;
+        }
+
+        #zp .main .zp-left .activity-num {
+            background: #cb3234;
+            margin: 0 4px;
+            display: inline-block;
+            min-width: 30px;
+        }
+
+        #zp .main .left-zp {
+            text-align: center;
+            width: 94%;
+        }
+
+        #zp .main .left-zp button {
+            width: 140px;
+            background: #cb3234;
+            color: #f9e285;
+            height: 30px;
+            font-size: 15px;
+            line-height: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            border: none;
+        }
+
+        #zp .main .zp-right {
+            margin-top: 34px;
+            margin-right: 28px;
+            padding-top: 8px;
+            height: 275px;
+            overflow-y: hidden;
+            color: #d6a45e;
+        }
+
+        #zp .main .zp-right p {
+            margin-left: 14px;
+            font-size: 13px;
+            height: 26px;
+            line-height: 26px;
+            border-bottom: 1px solid #333;
+        }
+
+        #zp .main .zp-right p .r {
+            float: right;
+        }
+
+        .dialog-modal {
+            position: fixed;
+            width: 360px;
+            left: 50%;
+            margin-left: -180px;
+            top: 200px;
+            border: 4px solid #cb3234;
+            border-radius: 5px;
+            text-align: center;
+            background: #e8d398;
+            z-index: 2301;
+            padding: 15px;
+            display: none;
+        }
+
+        .dialog-modal h3 {
+            font-size: 20px;
+            color: #000;
+        }
+
+        .dialog-modal p {
+            margin: 5px 0;
+        }
+
+        .dialog-modal button {
+            width: 100px;
+            outline: none;
+            margin-top: 5px;
+            border: none;
+            color: #fff;
+            height: 30px;
+            line-height: 30px;
+            background: #006CFF;
+            cursor: pointer;
+        }
+
+        .cover {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: rgba(0, 0, 0, 0.4);
+            width: 100%; /*宽度设置为100%，这样才能使隐藏背景层覆盖原页面*/
+            height: 100%;
+            filter: alpha(opacity=60); /*设置透明度为60%*/
+            opacity: 0.6; /*非IE浏览器下设置透明度为60%*/
+            display: none;
+            z-Index: 2300;
+        }
+    </style>
+</head>
+<body>
+<section>
+    <div class="section-item relative" id="zp">
+        <img src="https://nqtown-prod.oss-cn-hangzhou.aliyuncs.com/20181123-1542949127829057723.jpg" class="bg"
+             alt="zp">
+        <div class="main absolute flex">
+            <div class="zp-left" style="padding: 0 10px;">
+                <img src="https://nqtown-prod.oss-cn-hangzhou.aliyuncs.com/20181120-1542693032785013306.png" alt=""
+                     class="zp-bg">
+                <div class="left-zp"></div>
+            </div>
+            <div class="zp-right"></div>
+        </div>
+    </div>
+    <div class="cover"></div>
+    <div class="dialog-modal">
+
+    </div>
+</section>
+</body>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script>
+    $(function () {
+        var luckyCount = 10;//抽奖次数
+        var sort = 6;
+        var currentAngle = 0;//当前度数
+        var Angle = 0;//后台传的度数
+        var timer;//定时器
+        var controlPoint = false;//点击触发 true-可点，1-不可点
+        var speed = 1;//转速
+        var awardName = "";//奖品名称
+        var thanks = 1;//0-谢谢惠顾，1-有奖
+
+        /* queryGoods(136);//查询商品
+         queryLuckyCount();//查询抽奖次数
+         queryRecord();//查询中奖纪录*/
+
+        var html = '';
+        html += buildLuckyCount(html,luckyCount,0);
+        $(".left-zp").html(html);
+
+        function buildLuckyCount(html,luckyCount,currentAngle) {
+            if (luckyCount) {
+                controlPoint = true;
+                html += '<img src="https://nqtown-prod.oss-cn-hangzhou.aliyuncs.com/20181121-1542781992099047607.png" style="transform:rotate(' + currentAngle + 'deg)" alt="" class="zp-point">' +
+                    '<h5>您还有<span class="activity-num">' + luckyCount + '</span>次抽奖机会</h5>' +
+                    '<button class="luck-btn">点击抽奖</button>';
+            } else {
+                controlPoint = false;
+                html += '<img src="https://nqtown-prod.oss-cn-hangzhou.aliyuncs.com/20181121-1542782026149084093.png" style="transform:rotate(' + currentAngle + 'deg)" alt="" class="zp-point">' +
+                    '<h5>您暂时没有抽奖机会</h5>';
+            }
+            return html
+        }
+
+        /*function queryLuckyCount() {
+            $.get("/activityLottery/lotteryLucky/count",function (response) {
+                var html = "";
+                if (response.status) {
+                    luckyCount = response.data.remainLotteryCount;
+                    html += buildLuckyCount(html,luckyCount,0);
+                } else {
+                    html += '<img src="https://nqtown-prod.oss-cn-hangzhou.aliyuncs.com/20181121-1542782026149084093.png" alt="" class="zp-point">' +
+                        '<h5>您暂时没有抽奖机会</h5>';
+                }
+                $(".left-zp").html(html);
+            })
+        }*/
+
+        /*function queryRecord() {
+            $.get("/lotteryUserLuckyList",function (res) {
+                var html = "";
+                if (res.rows) {
+                    html += '<p style="margin-bottom: 5px;font-weight: bold">奖品名称<span class="r">中奖时间</span></p>';
+                    for (var i = 0; i < res.rows.length; i++) {
+                        html += '<p>' + res.rows[i].activityLotteryPrizeName + '<span class="r">' + res.rows[i].createTime + '</span></p>';
+                    }
+                } else {
+                    html += '<p style="text-align: center;line-height: 250px;border-bottom: none;color: #ccc;">暂无中奖纪录</p>';
+                }
+                $(".zp-right").html(html)
+            })
+        }*/
+
+        $(".left-zp").click(function () {
+            if (controlPoint) {
+                controlPoint = false;
+                if (sort) {
+                    switch (sort) {
+                        case 1:
+                            Angle = 0;
+                            break;
+                        case 2:
+                            Angle = 60;
+                            break;
+                        case 3:
+                            Angle = 120;
+                            break;
+                        case 4:
+                            Angle = 180;
+                            break;
+                        case 5:
+                            Angle = 240;
+                            break;
+                        case 6:
+                            Angle = 300;
+                            break;
+                    }
+                    /*awardName = data.data.activityLotteryPrize.name;*/
+                }
+                turnAround();
+            } else {
+                alert("您暂时没有抽奖机会！")
+            }
+        });
+
+        function turnAround() {
+            timer = setInterval(function () {
+                currentAngle = currentAngle + 5;//1ms转8度，控制转速
+                $(".zp-point").css('transform','rotate(' + currentAngle + 'deg)');
+                if (currentAngle == (360 * 2)) {
+                    clearInterval(timer);
+                    runAround();
+                }
+            },1);//控制转速
+        }
+
+        function runAround() {
+            timer = setInterval(function () {
+                currentAngle = currentAngle + 5;//1ms转2度，控制转速
+                $(".zp-point").css('transform','rotate(' + currentAngle + 'deg)');
+                if (currentAngle % 30 == 0) {//每次转30度，减速1次
+                    clearInterval(timer);
+                    speed++;
+                    runAround();
+                }
+                if (currentAngle == (360 * 4 + Angle)) {
+                    var html = "";
+                    luckyCount = luckyCount - 1;
+                    html += buildLuckyCount(html,luckyCount,currentAngle);
+                    $(".left-zp").html(html);
+                    clearInterval(timer);
+                    currentAngle = 0;
+                    speed = 1;
+                    var htmlMsg = '';
+                    if (thanks == 0) {
+                        htmlMsg += buildMsg(htmlMsg,false);
+                    } else {
+                        htmlMsg += buildMsg(htmlMsg,true);
+                    }
+                    $(".cover").show();
+                    $(".dialog-modal").html(htmlMsg).show();
+                    thanks = 1;
+                }
+            },speed);//控制转速
+        }
+
+        function buildMsg(html,flag) {
+            if (flag) {
+                html += '<h3>中奖啦！</h3>' +
+                    '<p>恭喜您抽中了<span style="color: red;font-weight: bold;font-size: 18px">' + awardName + '</span></p>' +
+                    '<p>已发放到当前账户，可在<a href="/free#/freeright" target="_blank" style="color:#006CFF;">账户-优惠券</a>查看详情</p>' +
+                    '<button>确定</button>';
+            } else {
+                html += '<h3>可惜啦！</h3>' +
+                    '<p>您差一点就中奖啦</p>' +
+                    '<button>确定</button>';
+            }
+            return html;
+        }
+
+        $(".dialog-modal").click(function (e) {
+            if (e.target.innerHTML == '确定') {
+                var htmlFlag = "";
+                htmlFlag += buildLuckyCount(htmlFlag,luckyCount,0);
+                $(".left-zp").html(htmlFlag);
+                /* queryRecord();*/
+                $(".dialog-modal").html('').hide();
+                $(".cover").hide();
+            }
+        });
+    })
+</script>
+</html>
